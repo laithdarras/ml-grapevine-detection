@@ -2,33 +2,26 @@ import tensorflow as tf
 import pathlib
 import numpy as np
 import os
+from sklearn.metrics import precision_score, recall_score, accuracy_score
 
-batch_size = 32
-img_height = 180
-img_width = 180
+# reduce load on cpu
+batch_size = 16
+img_height = 128
+img_width = 128
 
-test_dir = pathlib.Path('data/test')
+test_dir = pathlib.Path("data/test")
 
 def labels_from_dir(dir_path):
     paths = []
     labels = []
-
-    for img_path in sorted(dir_path.glob('*.jpg')):
+    for img_path in sorted(dir_path.glob("*.jpg")):
         filename = img_path.name.lower()
-
-        # healthy -> 0, esca -> 1
-        if filename.startswith('esca_'):
-            label = 1
-        else:
-            label = 0
-        
+        label = 1 if filename.startswith("esca_") else 0
         paths.append(str(img_path))
         labels.append(label)
-    
     return paths, np.array(labels, dtype=np.int32)
 
-
-# images only
+# reading images in tf
 test_images = tf.keras.utils.image_dataset_from_directory(
     test_dir,
     labels=None,
@@ -38,30 +31,29 @@ test_images = tf.keras.utils.image_dataset_from_directory(
     shuffle=False
 )
 
-# label extraction
-# train_paths, train_labels = labels_from_dir(train_dir)
-# val_paths, val_labels     = labels_from_dir(val_dir)
-test_paths, test_labels   = labels_from_dir(test_dir)
+# creating labels for images
+_, test_labels = labels_from_dir(test_dir)
 
-test_labels_ds = tf.data.Dataset.from_tensor_slices(test_labels).batch(batch_size)
-test_ds = tf.data.Dataset.zip((test_images, test_labels_ds)).prefetch(tf.data.AUTOTUNE)
-
-# load the trained model
+# loading saved trained model
 model = tf.keras.models.load_model("grape_model.keras")
 
-# compile and evaluate
-model.compile(
-    optimizer="adam",
-    loss=tf.keras.losses.SparseCategoricalCrossentropy(),
-    metrics=[
-        "accuracy",
-        tf.keras.metrics.Precision(name="precision"),
-        tf.keras.metrics.Recall(name="recall"),
-    ]
+# compute loss
+loss = model.evaluate(
+    tf.data.Dataset.zip((
+        test_images,
+        tf.data.Dataset.from_tensor_slices(test_labels).batch(batch_size)
+    )),
+    verbose=0
 )
 
-print("============== Test Evaluation ==============")
-results = model.evaluate(test_ds, verbose=2)
+# predictions
+y_pred = np.argmax(model.predict(test_images, verbose=0), axis=1)
 
-for name, value in zip(model.metrics_names, results):
-    print(f"{name}: {value:.4f}")
+# metrics
+precision = precision_score(test_labels, y_pred, zero_division=0)
+recall = recall_score(test_labels, y_pred, zero_division=0)
+
+print("============== Test Evaluation ==============")
+print(f"loss:      {loss[0]:.4f}")
+print(f"precision: {precision:.4f}")
+print(f"recall:    {recall:.4f}")

@@ -21,9 +21,9 @@ test_dir = pathlib.Path('data/test')
 image_count = len(list(train_dir.glob('*.jpg'))) + len(list(val_dir.glob('*.jpg'))) + len(list(test_dir.glob('*.jpg')))
 print(image_count)
 
-batch_size = 32
-img_height = 180
-img_width = 180
+batch_size = 16
+img_height = 128
+img_width = 128
 
 # train_ds = tf.keras.utils.image_dataset_from_directory(
 #   data_dir,
@@ -93,19 +93,18 @@ train_labeled_ds = tf.data.Dataset.zip((train_ds, train_labels_ds))
 val_labels_ds = tf.data.Dataset.from_tensor_slices(val_labels).batch(batch_size)
 val_labeled_ds = tf.data.Dataset.zip((val_ds, val_labels_ds))
 
-plt.figure(figsize=(10,10))
-for images, labels in train_labeled_ds.take(1):
-  for i in range(9):
-    ax = plt.subplot(3, 3, i+1)
-    plt.imshow(images[i].numpy().astype('uint8'))
-    plt.title(class_names[int(labels[i].numpy())])
-    plt.axis("off")
+# plt.figure(figsize=(10,10))
+# for images, labels in train_labeled_ds.take(1):
+#   for i in range(9):
+#     ax = plt.subplot(3, 3, i+1)
+#     plt.imshow(images[i].numpy().astype('uint8'))
+#     plt.title(class_names[int(labels[i].numpy())])
+#     plt.axis("off")
 
-# cache dataset into memory to speed up training
 AUTOTUNE = tf.data.AUTOTUNE
 
-train_ds = train_labeled_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
-val_ds = val_labeled_ds.cache().prefetch(buffer_size=AUTOTUNE)
+train_ds = train_labeled_ds.shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+val_ds = val_labeled_ds.prefetch(buffer_size=AUTOTUNE)
 
 #rescale rgb to [0,1] to decrease range of values
 normalization_layer = layers.Rescaling(1./255)
@@ -142,7 +141,7 @@ model.compile(optimizer='adam',
 #view summary
 model.summary()
 
-epochs=10
+epochs=5
 history = model.fit(
   train_ds,
   validation_data=val_ds,

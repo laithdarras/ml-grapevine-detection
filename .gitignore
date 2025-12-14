@@ -1,1 +1,4 @@
 *.jpg
+data.zip
+*.keras
+results.txt
