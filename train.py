@@ -149,5 +149,6 @@ history = model.fit(
   epochs=epochs
 )
 
-print("==============Test Evaluation=================\n")
-results = 
+# saving the training model to gather metrics
+model.save("grape_model.keras")
+print("saved model to grape_model.keras")
