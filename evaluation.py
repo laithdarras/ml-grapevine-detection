@@ -39,8 +39,8 @@ test_images = tf.keras.utils.image_dataset_from_directory(
 )
 
 # label extraction
-train_paths, train_labels = labels_from_dir(train_dir)
-val_paths, val_labels     = labels_from_dir(val_dir)
+# train_paths, train_labels = labels_from_dir(train_dir)
+# val_paths, val_labels     = labels_from_dir(val_dir)
 test_paths, test_labels   = labels_from_dir(test_dir)
 
 test_labels_ds = tf.data.Dataset.from_tensor_slices(test_labels).batch(batch_size)
@@ -64,4 +64,4 @@ print("============== Test Evaluation ==============")
 results = model.evaluate(test_ds, verbose=2)
 
 for name, value in zip(model.metrics_names, results):
-    print(f"{name}: {value:.2f}")
+    print(f"{name}: {value:.4f}")
