@@ -33,8 +33,3 @@ After training completes:
 ```docker run --rm -it -v "$(pwd):/workspace" grape-cnn python evaluation.py```
 
 This outputs test loss, precision, and recall.
-
-## Notes
-- All code runs inside Docker for reproducibility
-- Dataset and trained model files are excluded from version control
-- Training is CPU-based by default
