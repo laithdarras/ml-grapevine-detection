@@ -1,12 +1,12 @@
 # Grapevine Disease Detection (CSE 168: Lab 3)
 
-This project trains and evaluates a convolutional neural network (CNN) using TensorFlow to classify grapevine leaves as **healthy** or **infected with Esca**.
+## How to Run Instructions
 
-## Requirements
+### Requirements
 - Docker installed and running
 - No local Python, TensorFlow, or GPU required
 
-## Dataset
+### Dataset
 The dataset is not included in the repository.  
 You must provide the following directory structure locally before running:
 
@@ -15,19 +15,19 @@ You must provide the following directory structure locally before running:
   - val/     (*.jpg files named healthy_*.jpg or esca_*.jpg)
   - test/    (*.jpg files named healthy_*.jpg or esca_*.jpg)
 
-## Build Docker Image
+### Build Docker Image
 From the project root directory:
 
 ```docker build -t grape-cnn .```
 
-## Train the Model
+### Train the Model
 Run training inside Docker (mounts current directory into container):
 
 ```docker run --rm -it -v "$(pwd):/workspace" grape-cnn python train.py```
 
 This will train the model and save `grape_model.keras` to the project directory.
 
-## Evaluate the Model
+### Evaluate the Model
 After training completes:
 
 ```docker run --rm -it -v "$(pwd):/workspace" grape-cnn python evaluation.py```
