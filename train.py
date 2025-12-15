@@ -11,7 +11,6 @@ from tensorflow.keras.models import Sequential
 import pathlib
 
 #SOURCE OF THIS CODE: https://www.tensorflow.org/tutorials/images/classification
-# data_dir = pathlib.Path('data/')
 
 train_dir = pathlib.Path('data/train')
 val_dir = pathlib.Path('data/val')
@@ -24,22 +23,6 @@ print(image_count)
 batch_size = 16
 img_height = 128
 img_width = 128
-
-# train_ds = tf.keras.utils.image_dataset_from_directory(
-#   data_dir,
-#   validation_split=0.2,
-#   subset="training",
-#   seed=123,
-#   image_size=(img_height, img_width),
-#   batch_size=batch_size)
-
-# val_ds = tf.keras.utils.image_dataset_from_directory(
-#   data_dir,
-#   validation_split=0.2,
-#   subset="validation",
-#   seed=123,
-#   image_size=(img_height, img_width),
-#   batch_size=batch_size)
 
 # images
 train_ds = tf.keras.utils.image_dataset_from_directory(
@@ -78,14 +61,6 @@ print("train label counts (healthy, esca): ", np.bincount(train_labels, minlengt
 print("val label counts (healthy, esca): ", np.bincount(val_labels, minlength=2))
 
 class_names = ("healthy","esca")
-
-# plt.figure(figsize=(10, 10))
-# for images, labels in train_ds.take(1):
-#   for i in range(9):
-#     ax = plt.subplot(3, 3, i + 1)
-#     plt.imshow(images[i].numpy().astype("uint8"))
-#     plt.title(class_names[labels[i]])
-#     plt.axis("off")
 
 # (images, labels)
 train_labels_ds = tf.data.Dataset.from_tensor_slices(train_labels).batch(batch_size)
@@ -147,6 +122,33 @@ history = model.fit(
   validation_data=val_ds,
   epochs=epochs
 )
+
+# loss plot
+plt.figure()
+plt.plot(history.history["loss"], label="train_loss")
+plt.plot(history.history["val_loss"], label="val_loss")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Loss vs Epoch")
+plt.legend()
+plt.tight_layout()
+plt.savefig("loss_curve.png")
+plt.close()
+
+# accuracy plot
+plt.figure()
+plt.plot(history.history["accuracy"], label="train_accuracy")
+plt.plot(history.history["val_accuracy"], label="val_accuracy")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.title("Accuracy vs Epoch")
+plt.legend()
+plt.tight_layout()
+plt.savefig("accuracy_curve.png")
+plt.close()
+
+print("Saved plots: loss_curve.png, accuracy_curve.png")
+
 
 # saving the training model to gather metrics
 model.save("grape_model.keras")
